@@ -24,7 +24,7 @@ const preBuiltPlatforms = {
 	},
 } as const;
 
-const version = '';
+const version = 'v0.0.15';
 const preBuiltUrl = `https://github.com/tsar-boomba/alloy/releases/download/${version}/`;
 
 const getUrl = (platform: keyof typeof preBuiltPlatforms) =>
