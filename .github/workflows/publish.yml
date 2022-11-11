@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with: ${{ github.token }}
       - name: Install latest rust
         uses: actions-rs/toolchain@v1
         with:
@@ -35,7 +36,7 @@ jobs:
       - run: |
           git config user.email "github-actions@github.com"
           git config user.name "github-actions"
-      - name: Cargo Release alloy-core
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
-        run: cargo release --allow-branch main -p alloy-core --all-features --tag-name 'v{{version}}' --no-confirm -v -x ${{ inputs.version }}
+      # - name: Cargo Release alloy-core
+      #   env:
+      #     CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
+      #   run: cargo release --allow-branch main -p alloy-core --all-features --tag-name 'v{{version}}' -v -x ${{ inputs.version }}

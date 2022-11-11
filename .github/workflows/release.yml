@@ -20,7 +20,7 @@ jobs:
           draft: false
           body: '' # TODO actual body
           token: ${{ github.token }}
-          prerelease: ${{ contains('rc', github.ref) || contains('alpha', github.ref) || contains('beta', github.ref) }}
+          prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
 
   upload-library:
     needs: create-release
