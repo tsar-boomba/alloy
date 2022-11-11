@@ -1,4 +1,7 @@
-import { dlopen, FetchOptions } from 'https://deno.land/x/plug@1.0.0-rc.3/mod.ts';
+import {
+	dlopen,
+	FetchOptions,
+} from 'https://deno.land/x/plug@1.0.0-rc.3/mod.ts';
 import { Server } from './Alloy.ts';
 
 const preBuiltPlatforms = {
@@ -25,10 +28,15 @@ const preBuiltPlatforms = {
 } as const;
 
 const version = 'v0.0.15';
-const preBuiltUrl = `https://github.com/tsar-boomba/alloy/releases/download/${version}/`;
+const preBuiltUrl =
+	`https://github.com/tsar-boomba/alloy/releases/download/${version}/`;
 
 const getUrl = (platform: keyof typeof preBuiltPlatforms) =>
-	`${preBuiltUrl}${preBuiltPlatforms[platform].prefix}alloy_runtime-${platform}-${version}.${preBuiltPlatforms[platform].extension}`;
+	`${preBuiltUrl}${
+		preBuiltPlatforms[platform].prefix
+	}alloy_runtime-${platform}-${version}.${
+		preBuiltPlatforms[platform].extension
+	}`;
 
 let uri = '/Users/isaiahgamble/Documents/GitHub/alloy/target/debug';
 if (!uri.endsWith('/')) uri += '/';
@@ -60,7 +68,7 @@ export const loadLibrary = async (uri?: string) => {
 		const serializedServer = JSON.stringify(server);
 		return lib.symbols.start(
 			new TextEncoder().encode(serializedServer),
-			serializedServer.length
+			serializedServer.length,
 		);
 	};
 };

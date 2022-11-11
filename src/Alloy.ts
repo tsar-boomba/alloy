@@ -72,8 +72,8 @@ export type RawRes = {
 };
 
 export type AlloyOptions = {
-	libraryUri?: string
-}
+	libraryUri?: string;
+};
 
 export class Alloy {
 	#library: ReturnType<typeof loadLibrary>;
