@@ -44,11 +44,12 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install cross-compilation tools
         uses: taiki-e/setup-cross-toolchain-action@v1
+        if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
         with:
           target: ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
       - name: Build Library
-        run: cargo build --release --locked -p alloy-runtime
+        run: cargo build --target ${{ matrix.target }} --release --locked -p alloy-runtime
       - name: Prepare Library (tar / zip it)
         shell: bash
         run: |
