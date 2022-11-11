@@ -1,25 +1,19 @@
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
 
 permissions:
   contents: write
 
 jobs:
-  create-release:
+  create-body:
     runs-on: ubuntu-latest
-    outputs:
-      upload-url: ${{ steps.create.outputs.upload-url }}
+    # outputs:
+    #   body: ${{ steps.create.outputs.upload-url }}
     steps:
       - uses: actions/checkout@v3
-      - uses: softprops/action-gh-release@cd28b0f5ee8571b76cfdaa62a30d51d752317477
-        id: create
-        with:
-          draft: false
-          body: '' # TODO actual body
-          token: ${{ github.token }}
-          prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+      - run: exit 0
 
   upload-library:
     needs: create-release
@@ -61,13 +55,14 @@ jobs:
               target/${{ matrix.target }}/release/${{ matrix.prefix }}alloy_runtime.${{ matrix.extension }}
           fi
       - name: Add Artifact To Release
-        uses: softprops/action-gh-release@cd28b0f5ee8571b76cfdaa62a30d51d752317477
+        uses: svenstaro/upload-release-action@v2
         with:
           body: ''
-          append_body: true
-          token: ${{ github.token }}
-          tag_name: ${{ github.ref }}
-          files: ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref_name }}.${{ matrix.extension }}*
+          file: ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref_name }}.${{ matrix.extension }}*
+          file_glob: true
+          overwrite: true
+          tag: ${{ github.ref }}
+          release_name: ${{{ github.ref_name }}}
   
   upload-macos:
     needs: create-release
@@ -92,11 +87,12 @@ jobs:
             tar -czvf liballoy_runtime-aarch64-apple-darwin-${{ github.ref_name }}.dylib.tar.gz \
               target/aarch64-apple-darwin/release/liballoy_runtime.dylib
       - name: Add Artifact To Release
-        uses: softprops/action-gh-release@cd28b0f5ee8571b76cfdaa62a30d51d752317477
+        uses: svenstaro/upload-release-action@v2
         with:
           body: ''
-          append_body: true
-          token: ${{ github.token }}
-          tag_name: ${{ github.ref }}
-          files: liballoy_runtime-*
+          file: liballoy_runtime-*
+          file_glob: true
+          overwrite: true
+          tag: ${{ github.ref }}
+          release_name: ${{{ github.ref_name }}}
 
