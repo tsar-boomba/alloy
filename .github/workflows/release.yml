@@ -16,7 +16,7 @@ jobs:
       - run: exit 0
 
   upload-library:
-    needs: create-release
+    needs: create-body
     strategy:
       fail-fast: false
       matrix:
@@ -76,7 +76,7 @@ jobs:
           release_name: ${{ github.ref_name }}
   
   upload-macos:
-    needs: create-release
+    needs: create-body
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
