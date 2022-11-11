@@ -5,6 +5,7 @@ edition = "2021"
 license = "MIT"
 homepage = "https://github.com/tsar-boomba/alloy"
 repository = "https://github.com/tsar-boomba/alloy"
+description = "Structs used to build a runtime for alloy."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
