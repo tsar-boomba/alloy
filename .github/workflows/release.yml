@@ -54,10 +54,10 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            7z a -tzip "${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref }}.${{ matrix.extension }}.zip" \
+            7z a -tzip "${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref_name }}.${{ matrix.extension }}.zip" \
               target/${{ matrix.target }}/release/${{ matrix.prefix }}alloy_runtime.${{ matrix.extension }}
           else
-            tar -czvf ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref }}.${{ matrix.extension }}.tar.gz \
+            tar -czvf ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref_name }}.${{ matrix.extension }}.tar.gz \
               target/${{ matrix.target }}/release/${{ matrix.prefix }}alloy_runtime.${{ matrix.extension }}
           fi
       - name: Add Artifact To Release
@@ -67,7 +67,7 @@ jobs:
           append_body: true
           token: ${{ github.token }}
           tag_name: ${{ github.ref }}
-          files: ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref }}.${{ matrix.extension }}*
+          files: ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref_name }}.${{ matrix.extension }}*
   
   upload-macos:
     needs: create-release
@@ -90,9 +90,9 @@ jobs:
       - name: Prepare Library (tar / zip it)
         shell: bash
         run: |
-            tar -czvf liballoy_runtime-x86_64-apple-darwin-${{ github.ref }}.dylib.tar.gz \
+            tar -czvf liballoy_runtime-x86_64-apple-darwin-${{ github.ref_name }}.dylib.tar.gz \
               target/release/liballoy_runtime.dylib
-            tar -czvf liballoy_runtime-aarch64-apple-darwin-${{ github.ref }}.dylib.tar.gz \
+            tar -czvf liballoy_runtime-aarch64-apple-darwin-${{ github.ref_name }}.dylib.tar.gz \
               target/aarch64-apple-darwin/release/liballoy_runtime.dylib
       - name: Add Artifact To Release
         uses: softprops/action-gh-release@v1
@@ -101,5 +101,5 @@ jobs:
           append_body: true
           token: ${{ github.token }}
           tag_name: ${{ github.ref }}
-          files: liballoy_runtime-*-${{ github.ref }}*
+          files: liballoy_runtime-*-${{ github.ref_name }}*
 
