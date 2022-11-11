@@ -1,17 +1,18 @@
 on: 
   workflow_dispatch:
-    version:
-      description: 'Version update type to preform'
-      required: true
-      type: choice
-      options:
-        - patch
-        - minor
-        - major
-        - alpha
-        - beta
-        - rc
-        - release
+    inputs:
+      version:
+        description: 'Version update type to preform'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - alpha
+          - beta
+          - rc
+          - release
 
 permissions:
   contents: write
@@ -33,4 +34,6 @@ jobs:
           tool: cargo-release
 
       - name: Cargo Release alloy-core
-        run: cargo release --allow-branch main -p alloy-core --all-features --sign --tag-prefix '' -x ${{ inputs.version }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
+        run: cargo release --allow-branch main -p alloy-core --all-features --sign --tag-prefix '' -v -x ${{ inputs.version }}

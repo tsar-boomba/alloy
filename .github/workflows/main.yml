@@ -19,7 +19,7 @@ jobs:
           cargo fmt --all --check
           deno fmt --check
 
-  test-rust:
+  test:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
