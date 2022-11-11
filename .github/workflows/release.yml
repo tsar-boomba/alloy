@@ -13,7 +13,7 @@ jobs:
       upload-url: ${{ steps.create.outputs.upload-url }}
     steps:
       - uses: actions/checkout@v3
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v0.1.14
         id: create
         with:
           draft: false
@@ -61,7 +61,7 @@ jobs:
               target/${{ matrix.target }}/release/${{ matrix.prefix }}alloy_runtime.${{ matrix.extension }}
           fi
       - name: Add Artifact To Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v0.1.14
         with:
           body: ''
           append_body: true
@@ -83,10 +83,7 @@ jobs:
       - name: Build x86 Library
         run: cargo build --release --locked -p alloy-runtime
       - name: Build aarch64 Library
-        run: |
-          sudo xcode-select -s "/Applications/Xcode_12.3.app"
-          sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
-          cargo build --release --locked -p alloy-runtime --target aarch64-apple-darwin
+        run: cargo build --release --locked -p alloy-runtime --target aarch64-apple-darwin
       - name: Prepare Library (tar / zip it)
         shell: bash
         run: |
@@ -95,7 +92,7 @@ jobs:
             tar -czvf liballoy_runtime-aarch64-apple-darwin-${{ github.ref_name }}.dylib.tar.gz \
               target/aarch64-apple-darwin/release/liballoy_runtime.dylib
       - name: Add Artifact To Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v0.1.14
         with:
           body: ''
           append_body: true
