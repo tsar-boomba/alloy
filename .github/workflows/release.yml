@@ -54,7 +54,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
       - name: Build Library
-        run: cross build --release --locked -p alloy-runtime
+        run: cargo build --release --locked -p alloy-runtime
       - name: Prepare Library (tar / zip it)
         shell: bash
         run: |
