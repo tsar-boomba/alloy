@@ -1,0 +1,42 @@
+on: [pull_request, push]
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Install latest rust
+        uses: actions-rs/toolchain@v1
+        with:
+            profile: minimal
+            toolchain: stable
+            components: rustfmt
+      - name: Check Formatting
+        run:
+          - cargo fmt --all --check
+          - deno fmt --check
+
+  test-rust:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Install latest rust
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            profile: minimal
+      - uses: Swatinem/rust-cache@v2
+      - name: Run Rust Tests
+        run: cargo test
+      - name: Run Deno Tests
+        run: deno test --unstable -A
+  

@@ -1,0 +1,76 @@
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    outputs:
+      upload-url: ${{ steps.create.outputs.upload-url }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: softprops/action-gh-release@v1
+        id: create
+        with:
+          draft: false
+          body: '' # TODO actual body
+          token: ${{ github.token }}
+          prerelease: ${{ contains('rc', github.ref) || contains('alpha', github.ref) || contains('beta', github.ref) }}
+
+  upload-library:
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            prefix: lib
+            extension: so
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            prefix: lib
+            extension: dylib
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            prefix: lib
+            extension: so
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            prefix: lib
+            extension: dylib
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            prefix: ''
+            extension: dll
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install cross-compilation tools
+        uses: taiki-e/setup-cross-toolchain-action@v1
+        with:
+          target: ${{ matrix.target }}
+      - name: Build Library
+        run: cross build --release --locked -p alloy-runtime
+      - name: Prepare Library (tar / zip it)
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            7z a -tzip "${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref }}.${{ matrix.extension }}.zip" \
+              target/${{ matrix.target }}/release/${{ matrix.prefix }}alloy_runtime.${{ matrix.extension }}
+          else
+            tar -czvf ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref }}.${{ matrix.extension }}.tar.gz \
+              target/${{ matrix.target }}/release/${{ matrix.prefix }}alloy_runtime.${{ matrix.extension }}
+          fi
+      - name: Add Artifact To Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ''
+          append_body: true
+          token: ${{ github.token }}
+          tag_name: ${{ github.ref }}
+          files: ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref }}.${{ matrix.extension }}*

@@ -1,0 +1,16 @@
+{
+	"fmt": {
+		"options": {
+			"singleQuote": true,
+			"useTabs": true
+		},
+		"files": {
+			"exclude": ["target/"]
+		}
+	},
+	"lint": {
+		"rules": {
+			"exclude": ["no-explicit-any"]
+		}
+	}
+}

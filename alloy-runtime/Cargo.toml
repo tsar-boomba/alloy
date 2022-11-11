@@ -1,0 +1,18 @@
+[package]
+name = "alloy-runtime"
+version = "0.0.1"
+edition = "2021"
+publish = false
+
+[lib]
+name = "alloy_runtime"
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+alloy-core = { path = "../alloy-core", features = ["axum"] }
+axum = "0.5.17"
+hyper = "0.14.23"
+tokio = "1.21.2"

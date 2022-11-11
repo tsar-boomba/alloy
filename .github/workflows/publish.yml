@@ -1,0 +1,36 @@
+on: 
+  workflow_dispatch:
+    version:
+      description: 'Version update type to preform'
+      required: true
+      type: choice
+      options:
+        - patch
+        - minor
+        - major
+        - alpha
+        - beta
+        - rc
+        - release
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install latest rust
+        uses: actions-rs/toolchain@v1
+        with:
+            profile: minimal
+            toolchain: stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install cargo-release
+        uses: taiki-e/install-action@v1
+        with:
+          tool: cargo-release
+
+      - name: Cargo Release alloy-core
+        run: cargo release --allow-branch main -p alloy-core --all-features --sign --tag-prefix '' -x ${{ inputs.version }}

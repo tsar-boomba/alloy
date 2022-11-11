@@ -1,2 +1,3 @@
-# alloy
- React SSR in Rust
+# Alloy
+
+Http in deno, powered by rust
