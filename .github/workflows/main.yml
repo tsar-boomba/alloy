@@ -15,9 +15,9 @@ jobs:
             toolchain: stable
             components: rustfmt
       - name: Check Formatting
-        run:
-          - cargo fmt --all --check
-          - deno fmt --check
+        run: |
+          cargo fmt --all --check
+          deno fmt --check
 
   test-rust:
     strategy:
