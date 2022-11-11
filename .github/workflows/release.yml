@@ -74,36 +74,3 @@ jobs:
           overwrite: true
           tag: ${{ github.ref }}
           release_name: ${{ github.ref_name }}
-  
-  upload-macos:
-    needs: create-body
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-            toolchain: stable
-            profile: minimal
-      - run: rustup target add aarch64-apple-darwin
-      - uses: Swatinem/rust-cache@v2
-      - name: Build x86 Library
-        run: cargo build --release --locked -p alloy-runtime
-      - name: Build aarch64 Library
-        run: cargo build --release --locked -p alloy-runtime --target aarch64-apple-darwin
-      - name: Prepare Library (tar it)
-        shell: bash
-        run: |
-            tar -czvf liballoy_runtime-x86_64-apple-darwin-${{ github.ref_name }}.dylib.tar.gz \
-              target/release/liballoy_runtime.dylib
-            tar -czvf liballoy_runtime-aarch64-apple-darwin-${{ github.ref_name }}.dylib.tar.gz \
-              target/aarch64-apple-darwin/release/liballoy_runtime.dylib
-      - name: Add Artifact To Release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          body: ''
-          file: liballoy_runtime-*
-          file_glob: true
-          overwrite: true
-          tag: ${{ github.ref }}
-          release_name: ${{ github.ref_name }}
-
