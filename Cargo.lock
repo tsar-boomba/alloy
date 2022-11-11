@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "alloy-core"
-version = "0.0.12"
+version = "0.0.13"
 dependencies = [
  "axum",
  "futures-core",
