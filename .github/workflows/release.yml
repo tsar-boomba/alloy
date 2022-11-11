@@ -24,24 +24,17 @@ jobs:
   upload-library:
     needs: create-release
     strategy:
+      fail-fast: false
       matrix:
         include:
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
             prefix: lib
             extension: so
-          - target: aarch64-apple-darwin
-            os: macos-latest
-            prefix: lib
-            extension: dylib
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             prefix: lib
             extension: so
-          - target: x86_64-apple-darwin
-            os: macos-latest
-            prefix: lib
-            extension: dylib
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             prefix: ''
@@ -53,6 +46,7 @@ jobs:
         uses: taiki-e/setup-cross-toolchain-action@v1
         with:
           target: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
       - name: Build Library
         run: cargo build --release --locked -p alloy-runtime
       - name: Prepare Library (tar / zip it)
@@ -73,3 +67,38 @@ jobs:
           token: ${{ github.token }}
           tag_name: ${{ github.ref }}
           files: ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref }}.${{ matrix.extension }}*
+  
+  upload-macos:
+    needs: create-release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            profile: minimal
+      - run: rustup target add aarch64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+      - name: Build x86 Library
+        run: cargo build --release --locked -p alloy-runtime
+      - name: Build aarch64 Library
+        run: |
+          sudo xcode-select -s "/Applications/Xcode_12.3.app"
+          sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+          cargo build --release --locked -p alloy-runtime --target aarch64-apple-darwin
+      - name: Prepare Library (tar / zip it)
+        shell: bash
+        run: |
+            tar -czvf liballoy_runtime-x86_64-apple-darwin-${{ github.ref }}.dylib.tar.gz \
+              target/release/liballoy_runtime.dylib
+            tar -czvf liballoy_runtime-aarch64-apple-darwin-${{ github.ref }}.dylib.tar.gz \
+              target/aarch64-apple-darwin/release/liballoy_runtime.dylib
+      - name: Add Artifact To Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ''
+          append_body: true
+          token: ${{ github.token }}
+          tag_name: ${{ github.ref }}
+          files: liballoy_runtime-*-${{ github.ref }}*
+
