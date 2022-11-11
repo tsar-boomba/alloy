@@ -33,6 +33,14 @@ jobs:
             os: windows-latest
             prefix: ''
             extension: dll
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            prefix: lib
+            extension: dylib
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            prefix: lib
+            extension: dylib
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -41,6 +49,9 @@ jobs:
         if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
         with:
           target: ${{ matrix.target }}
+      - name: Add target
+        if: ${{ matrix.target != 'aarch64-unknown-linux-gnu' }}
+        run: rustup add target ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
       - name: Build Library
         run: cargo build --target ${{ matrix.target }} --release --locked -p alloy-runtime
@@ -62,7 +73,7 @@ jobs:
           file_glob: true
           overwrite: true
           tag: ${{ github.ref }}
-          release_name: ${{{ github.ref_name }}}
+          release_name: ${{ github.ref_name }}
   
   upload-macos:
     needs: create-release
@@ -94,5 +105,5 @@ jobs:
           file_glob: true
           overwrite: true
           tag: ${{ github.ref }}
-          release_name: ${{{ github.ref_name }}}
+          release_name: ${{ github.ref_name }}
 
