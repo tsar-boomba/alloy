@@ -32,7 +32,9 @@ jobs:
         uses: taiki-e/install-action@v1
         with:
           tool: cargo-release
-
+      - run: |
+        git config user.email "github-actions@github.com"
+        git config user.name "github-actions"
       - name: Cargo Release alloy-core
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
