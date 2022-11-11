@@ -55,21 +55,16 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Build Library
         run: cargo build --target ${{ matrix.target }} --release --locked -p alloy-runtime
-      - name: Prepare Library (tar / zip it)
+      - name: Move & Rename Library
         shell: bash
         run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            7z a -tzip "${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref_name }}.${{ matrix.extension }}.zip" \
-              target/${{ matrix.target }}/release/${{ matrix.prefix }}alloy_runtime.${{ matrix.extension }}
-          else
-            tar -czvf ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref_name }}.${{ matrix.extension }}.tar.gz \
-              target/${{ matrix.target }}/release/${{ matrix.prefix }}alloy_runtime.${{ matrix.extension }}
-          fi
+          cp target/${{ matrix.target }}/release/${{ matrix.prefix }}alloy_runtime.${{ matrix.extension }} \
+            ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref_name }}.${{ matrix.extension }}
       - name: Add Artifact To Release
         uses: svenstaro/upload-release-action@v2
         with:
           body: ''
-          file: ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}-${{ github.ref_name }}.${{ matrix.extension }}*
+          file: ${{ matrix.prefix }}alloy_runtime-${{ matrix.target }}*
           file_glob: true
           overwrite: true
           tag: ${{ github.ref }}

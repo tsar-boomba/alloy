@@ -1,4 +1,4 @@
-mod executor;
+pub mod executor;
 
 use std::{
     future::Future,
@@ -7,16 +7,9 @@ use std::{
     task::{Context, Poll, Waker},
 };
 
-use lazy_static::lazy_static;
 use serde::Deserialize;
 
 use crate::{HandlerFn, HandlerReq};
-
-use self::executor::PromiseExecutor;
-
-lazy_static! {
-    pub static ref PROMISE_EXECUTOR: Arc<PromiseExecutor> = Arc::new(PromiseExecutor::new());
-}
 
 #[derive(Debug, Deserialize)]
 #[serde(tag = "t", content = "c")]
@@ -25,7 +18,7 @@ pub enum PromiseResult<T> {
     Rejected(String),
 }
 
-pub struct Promise<'a, T: Deserialize<'a>> {
+pub struct Promise<'a, T> {
     poll_promise: extern "C" fn() -> *const u8,
     result: PhantomData<&'a T>,
     shared_state: Arc<Mutex<SharedState>>,
@@ -38,7 +31,7 @@ impl<'a, T: Deserialize<'a>> Promise<'a, T> {
             waker: None,
         }));
 
-        PROMISE_EXECUTOR.add_promise(Arc::clone(&shared_state));
+        executor::PromiseExecutor::add_from_shared_state(Arc::clone(&shared_state));
 
         Self {
             poll_promise,
@@ -62,6 +55,7 @@ impl<'a, T: Deserialize<'a>> Promise<'a, T> {
     }
 }
 
+#[derive(Debug)]
 /// Shared state between the future and the promise queue
 pub(crate) struct SharedState {
     completed: bool,

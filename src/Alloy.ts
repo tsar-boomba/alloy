@@ -1,4 +1,4 @@
-import { start } from '../bindings.ts';
+import { loadLibrary } from './bindings.ts';
 import { handlerCallback } from './utils/handlerCallback.ts';
 import { AlloyBody, AlloyBodySource } from './Body.ts';
 
@@ -71,10 +71,19 @@ export type RawRes = {
 	body?: AlloyBody;
 };
 
+export type AlloyOptions = {
+	libraryUri?: string
+}
+
 export class Alloy {
+	#library: ReturnType<typeof loadLibrary>;
+	#options: AlloyOptions = {};
 	#routes: Record<string, RouteHandlers> = {};
 
-	constructor() {}
+	constructor(options?: AlloyOptions) {
+		if (options) this.#options = { ...this.#options, ...options };
+		this.#library = loadLibrary(this.#options.libraryUri);
+	}
 
 	#route(route: string, method: keyof RouteHandlers, handler: Handler): this {
 		if (route in this.#routes) {
@@ -205,7 +214,7 @@ export class Alloy {
 		return this.#route(route, 'head', opts);
 	}
 
-	startServer() {
+	async startServer() {
 		// turn handlers into pointers etc
 		const server: Server = {
 			routes: Object.fromEntries(
@@ -223,6 +232,9 @@ export class Alloy {
 				}),
 			),
 		};
+
+		const start = await this.#library;
+
 		start(server);
 	}
 }

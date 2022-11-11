@@ -1,9 +1,6 @@
 import { Alloy } from './deno/src/Alloy.ts';
 
-const alloy = new Alloy();
-
-const wait = (ms: number): Promise<void> =>
-	new Promise((resolve) => setTimeout(resolve, ms));
+const alloy = new Alloy({ libraryUri: 'target/debug/liballoy_runtime.dylib' });
 
 alloy.get('/', (req) => {
 	console.log(req);
