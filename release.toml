@@ -1,3 +1,4 @@
+# will be in alloy-core dir
 pre-release-replacements = [
-	{ file = "src/bindings.ts", search = "const version = '.*'", replace = "const version = '{{tag_name}}'" }
+	{ file = "../src/bindings.ts", search = "const version = '.*'", replace = "const version = '{{tag_name}}'" }
 ]
