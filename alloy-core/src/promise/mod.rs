@@ -3,10 +3,11 @@ pub mod executor;
 use std::{
     future::Future,
     marker::PhantomData,
-    sync::{Arc, Mutex},
+    sync::Arc,
     task::{Context, Poll, Waker},
 };
 
+use parking_lot::Mutex;
 use serde::Deserialize;
 
 use crate::{HandlerFn, HandlerReq};
@@ -31,7 +32,7 @@ impl<'a, T: Deserialize<'a>> Promise<'a, T> {
             waker: None,
         }));
 
-        executor::PromiseExecutor::add_from_shared_state(Arc::clone(&shared_state));
+        executor::add_from_shared_state(Arc::clone(&shared_state));
 
         Self {
             poll_promise,
@@ -75,12 +76,12 @@ impl<'de, T: Deserialize<'de>> Promise<'de, T> {
         let (length, value_ptr) = unsafe { crate::json::read_json_buffer(poll_result) };
         if length <= 0 {
             let shared_state = self.shared_state.as_ref();
-            let mut shared_state = shared_state.lock().unwrap();
+            let mut shared_state = shared_state.lock();
             shared_state.waker = Some(cx.waker().clone());
             Poll::Pending
         } else {
             let shared_state = self.shared_state.as_ref();
-            let mut shared_state = shared_state.lock().unwrap();
+            let mut shared_state = shared_state.lock();
             shared_state.completed = true;
             let value_slice = unsafe { std::slice::from_raw_parts(value_ptr, length) };
             let value: PromiseResult<T> = serde_json::from_slice(value_slice).unwrap();

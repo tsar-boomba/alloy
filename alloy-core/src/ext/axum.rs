@@ -19,26 +19,31 @@ use crate::{
     Handler, HandlerFn, HandlerReq, Server,
 };
 
+#[inline(always)]
 unsafe fn transmute_handler_ptr(ptr: usize) -> HandlerFn {
     let handler_ptr = ptr as *const u8;
     std::mem::transmute::<_, HandlerFn>(handler_ptr)
 }
 
-async fn handle_body(req: &mut HandlerReq, handler_opts: Handler, raw_body: hyper::Body) {
-    if handler_opts.body {
+#[inline(always)]
+async fn handle_body(req: &mut HandlerReq, raw_body: hyper::Body) {
+    
         let full_body = hyper::body::to_bytes(raw_body).await.unwrap();
         req.body = Some(full_body.to_vec());
-    }
+    
 }
 
+#[inline(always)]
 fn handle_params(req: &mut HandlerReq, params: HashMap<String, String>) {
     req.params = params;
 }
 
+#[inline(always)]
 fn handle_query(req: &mut HandlerReq, query: HashMap<String, String>) {
     req.query = query;
 }
 
+#[inline(always)]
 fn handle_headers(req: &mut HandlerReq, headers: HeaderMap) {
     req.headers = headers
         .keys()
@@ -72,7 +77,9 @@ fn handle_req(
           OriginalUri(pathname): OriginalUri| async move {
         let mut req = HandlerReq::default();
 
-        handle_body(&mut req, handler_opts, raw_body).await;
+        if handler_opts.body {
+            handle_body(&mut req, raw_body).await;
+        };
         handle_params(&mut req, params);
         handle_query(&mut req, query);
         handle_headers(&mut req, headers);

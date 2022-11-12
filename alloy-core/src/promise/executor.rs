@@ -1,6 +1,7 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use once_cell::sync::OnceCell;
+use parking_lot::Mutex;
 
 use super::{Promise, SharedState};
 
@@ -18,46 +19,40 @@ impl PromiseExecutor {
             queue: Mutex::new(vec![]),
         }
     }
-
-    pub(crate) fn add_from_shared_state(shared_state: Arc<Mutex<SharedState>>) {
-        let executor: &'static PromiseExecutor = EXECUTOR.get().unwrap();
-        executor.queue.lock().unwrap().push(shared_state);
-    }
-
-    pub fn add_promise<T>(promise: &Promise<'_, T>) {
-        let executor: &'static PromiseExecutor = EXECUTOR.get().unwrap();
-        executor
-            .queue
-            .lock()
-            .unwrap()
-            .push(Arc::clone(&promise.shared_state));
-    }
 }
 
-/// Initialize global promise executor, do not use if using provided `run` function
+/// Initialize global promise executor, only call once in your program
 pub fn initialize() {
     EXECUTOR.set(PromiseExecutor::new()).unwrap();
 }
 
+pub(crate) fn add_from_shared_state(shared_state: Arc<Mutex<SharedState>>) {
+    let executor: &'static PromiseExecutor = EXECUTOR.get().unwrap();
+    executor.queue.lock().push(shared_state);
+}
+
+pub fn add_promise<T>(promise: &Promise<'_, T>) {
+    let executor: &'static PromiseExecutor = EXECUTOR.get().unwrap();
+    executor
+        .queue
+        .lock()
+        .push(Arc::clone(&promise.shared_state));
+}
+
+
 pub async fn run() {
     let executor: &'static PromiseExecutor = EXECUTOR.get().unwrap();
-    let mut queue = executor.queue.lock().unwrap();
-    let mut completed = Vec::<usize>::with_capacity(queue.len());
-    for (i, promise) in queue.iter_mut().enumerate() {
-        let mut promise = promise.lock().unwrap();
+    let mut queue = executor.queue.lock();
+
+    // wake incomplete promises & filter out completed promises
+    queue.iter_mut().for_each(|promise| {
+        let mut promise = promise.lock();
 
         if !promise.completed {
             if let Some(waker) = promise.waker.take() {
                 waker.wake();
             }
-        } else {
-            // track completed promises
-            completed.push(i);
-        }
-    }
-
-    // remove completed promises
-    for completed_index in completed {
-        queue.swap_remove(completed_index);
-    }
+        };
+    });
+    queue.retain(|promise| !promise.lock().completed);
 }

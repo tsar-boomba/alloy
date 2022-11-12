@@ -1,6 +1,6 @@
 use std::task::Poll;
 
-use axum::body::Bytes;
+use bytes::Bytes;
 use futures_core::Stream;
 use serde::Deserialize;
 

@@ -1,9 +1,8 @@
-import { Alloy } from './deno/src/Alloy.ts';
+import { Alloy } from './src/Alloy.ts';
 
-const alloy = new Alloy({ libraryUri: 'target/debug/liballoy_runtime.dylib' });
+const alloy = new Alloy({ libraryUri: `target/${Deno.args[0] ? 'release' : 'debug'}/liballoy_runtime.dylib` });
 
 alloy.get('/', (req) => {
-	console.log(req);
 	return {
 		body: 'thuthy baka',
 		headers: {

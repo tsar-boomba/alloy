@@ -11,8 +11,8 @@ crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde = { version = "1.0.147", features = ["derive"] }
+serde = { workspace = true, features = ["derive"] }
 alloy-core = { path = "../alloy-core", features = ["axum"] }
-axum = "0.5.17"
-hyper = "0.14.23"
-tokio = "1.21.2"
+axum = { workspace = true }
+hyper = { workspace = true }
+tokio = { workspace = true, features = ["full"] }

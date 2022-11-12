@@ -12,5 +12,8 @@
 		"rules": {
 			"exclude": ["no-explicit-any"]
 		}
+	},
+	"tasks": {
+		"bench": "deno run -A bench.ts"
 	}
 }
