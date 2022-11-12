@@ -7,7 +7,10 @@ await new Promise((resolve) => setTimeout(resolve, 500));
 const uri = 'http://127.0.0.1:3000';
 
 const req = (path: string, init?: RequestInit) =>
-	fetch(uri + path, { ...init, headers: { connection: 'close', ...init?.headers } });
+	fetch(uri + path, {
+		...init,
+		headers: { connection: 'close', ...init?.headers },
+	});
 
 /**
  * Kill server process if error happens
@@ -31,7 +34,7 @@ const methods = [
 	'PUT',
 	'DELETE',
 	'OPTIONS',
-	'HEAD' /* 'TRACE' is forbidden by fetch specification */,
+	'HEAD', /* 'TRACE' is forbidden by fetch specification */
 ];
 Deno.test(
 	'All Methods',
@@ -39,5 +42,5 @@ Deno.test(
 		for (const method of methods) {
 			await (await req('/', { method })).text();
 		}
-	})
+	}),
 );

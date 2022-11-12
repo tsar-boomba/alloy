@@ -27,10 +27,8 @@ unsafe fn transmute_handler_ptr(ptr: usize) -> HandlerFn {
 
 #[inline(always)]
 async fn handle_body(req: &mut HandlerReq, raw_body: hyper::Body) {
-    
-        let full_body = hyper::body::to_bytes(raw_body).await.unwrap();
-        req.body = Some(full_body.to_vec());
-    
+    let full_body = hyper::body::to_bytes(raw_body).await.unwrap();
+    req.body = Some(full_body.to_vec());
 }
 
 #[inline(always)]

@@ -1,4 +1,7 @@
-import { dlopen, FetchOptions } from 'https://deno.land/x/plug@1.0.0-rc.3/mod.ts';
+import {
+	dlopen,
+	FetchOptions,
+} from 'https://deno.land/x/plug@1.0.0-rc.3/mod.ts';
 import { Server } from './Alloy.ts';
 
 export const preBuiltPlatforms = {
@@ -25,10 +28,15 @@ export const preBuiltPlatforms = {
 } as const;
 
 const version = 'v0.0.15';
-const preBuiltUrl = `https://github.com/tsar-boomba/alloy/releases/download/${version}/`;
+const preBuiltUrl =
+	`https://github.com/tsar-boomba/alloy/releases/download/${version}/`;
 
 const getUrl = (platform: keyof typeof preBuiltPlatforms) =>
-	`${preBuiltUrl}${preBuiltPlatforms[platform].prefix}alloy_runtime-${platform}-${version}.${preBuiltPlatforms[platform].extension}`;
+	`${preBuiltUrl}${
+		preBuiltPlatforms[platform].prefix
+	}alloy_runtime-${platform}-${version}.${
+		preBuiltPlatforms[platform].extension
+	}`;
 
 const opts: FetchOptions = {
 	cache: 'use',
@@ -42,7 +50,7 @@ const libDef = {
 export const loadLibrary = async (uri?: string) => {
 	if (!uri && !(Deno.build.target in preBuiltPlatforms)) {
 		throw new Error(
-			`There are currently no pre build libraries for ${Deno.build.target}, please open an issue if you think we should add them. https://github.com/tsar-boomba/alloy/issues`
+			`There are currently no pre build libraries for ${Deno.build.target}, please open an issue if you think we should add them. https://github.com/tsar-boomba/alloy/issues`,
 		);
 	}
 
@@ -52,7 +60,7 @@ export const loadLibrary = async (uri?: string) => {
 		const serializedServer = JSON.stringify(server);
 		return lib.symbols.start(
 			new TextEncoder().encode(serializedServer),
-			serializedServer.length
+			serializedServer.length,
 		);
 	};
 };

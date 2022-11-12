@@ -39,7 +39,6 @@ pub fn add_promise<T>(promise: &Promise<'_, T>) {
         .push(Arc::clone(&promise.shared_state));
 }
 
-
 pub async fn run() {
     let executor: &'static PromiseExecutor = EXECUTOR.get().unwrap();
     let mut queue = executor.queue.lock();

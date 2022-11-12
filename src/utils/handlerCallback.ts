@@ -1,4 +1,10 @@
-import { AlloyRequest, AlloyResponse, Handler, RawReq, RawRes } from '../Alloy.ts';
+import {
+	AlloyRequest,
+	AlloyResponse,
+	Handler,
+	RawReq,
+	RawRes,
+} from '../Alloy.ts';
 import { AlloyBody } from '../Body.ts';
 import { jsonBuffer } from './jsonBuffer.ts';
 import { PollFn, promiseResult, queryablePromise } from './queryablePromise.ts';
@@ -18,7 +24,7 @@ export const handlerCallback = (fn: Handler['handler']) => {
 		} as const,
 		(reqPtr, len) => {
 			const rawReq = new Uint8Array(
-				Deno.UnsafePointerView.getArrayBuffer(reqPtr, len)
+				Deno.UnsafePointerView.getArrayBuffer(reqPtr, len),
 			);
 			const req: RawReq = JSON.parse(new TextDecoder().decode(rawReq));
 			const finalReq: AlloyRequest = {
@@ -30,7 +36,9 @@ export const handlerCallback = (fn: Handler['handler']) => {
 			const result = fn(finalReq);
 
 			// called whenever rust side polls promise
-			const pollFn: PollFn<AlloyResponse | void> = ({ value, fulfilled, rejected }) => {
+			const pollFn: PollFn<AlloyResponse | void> = (
+				{ value, fulfilled, rejected },
+			) => {
 				if (fulfilled) {
 					const res = value ?? { status: 200 };
 					const rawRes: RawRes = {
@@ -46,7 +54,7 @@ export const handlerCallback = (fn: Handler['handler']) => {
 								promiseResult('Fulfilled', {
 									...rawRes,
 									body: { t: 'Bytes', c: Array.from(body.rawAsBytes()) },
-								})
+								}),
 							);
 						} else {
 							// backed by stream, do some extra stuff to get it pollable by rust
@@ -65,31 +73,31 @@ export const handlerCallback = (fn: Handler['handler']) => {
 												promiseResult('Fulfilled', {
 													done,
 													value: chunk ? Array.from(chunk) : undefined,
-												})
+												}),
 											);
 										} else if (fulfilled) {
 											return jsonBuffer(
 												promiseResult(
 													'Rejected',
-													'Read call fulfilled without value.'
-												)
+													'Read call fulfilled without value.',
+												),
 											);
 										} else if (rejected) {
 											return jsonBuffer(
 												promiseResult(
 													'Rejected',
-													rejected?.toString() ?? 'Unknown error'
-												)
+													rejected?.toString() ?? 'Unknown error',
+												),
 											);
 										} else {
 											return jsonBuffer('');
 										}
-									}
+									},
 								);
 
 								const readPollPtr = new Deno.UnsafeCallback(
 									{ parameters: [], result: 'buffer' } as const,
-									queryable.poll
+									queryable.poll,
 								);
 
 								return readPollPtr.pointer;
@@ -97,7 +105,7 @@ export const handlerCallback = (fn: Handler['handler']) => {
 
 							const readFnPointer = new Deno.UnsafeCallback(
 								{ parameters: [], result: 'function' } as const,
-								read
+								read,
 							);
 
 							return jsonBuffer(
@@ -105,7 +113,7 @@ export const handlerCallback = (fn: Handler['handler']) => {
 									...rawRes,
 									// NOTE: might need to send ptr as string if a bigint
 									body: { t: 'Stream', c: readFnPointer.pointer },
-								})
+								}),
 							);
 						}
 					} else {
@@ -113,28 +121,27 @@ export const handlerCallback = (fn: Handler['handler']) => {
 					}
 				} else if (rejected) {
 					return jsonBuffer(
-						promiseResult('Rejected', rejected?.toString() ?? 'Unknown error')
+						promiseResult('Rejected', rejected?.toString() ?? 'Unknown error'),
 					);
 				} else {
 					return jsonBuffer('');
 				}
 			};
 
-			const queryable =
-				result?.constructor === Promise
-					? queryablePromise(result, pollFn)
-					: queryablePromise(Promise.resolve(result), pollFn);
+			const queryable = result?.constructor === Promise
+				? queryablePromise(result, pollFn)
+				: queryablePromise(Promise.resolve(result), pollFn);
 
 			const pollPtr = new Deno.UnsafeCallback(
 				{
 					parameters: [],
 					result: 'buffer',
 				} as const,
-				queryable.poll
+				queryable.poll,
 			);
 
 			return pollPtr.pointer;
-		}
+		},
 	);
 
 	return ptr;
